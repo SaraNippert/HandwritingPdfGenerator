@@ -19,11 +19,11 @@ This app currently supports generating sheets for the following:
 - French cursive (appears, but not complete)
 
 ## To Do
-[ ] Add layout for two pages per sheet
-[ ] Add booklet printing
-[ ] Fix French cursive spacing
-[ ] Add support for Kanji
-[ ] Add font choices
+- [ ] Add layout for two pages per sheet
+- [ ] Add booklet printing
+- [ ] Fix French cursive spacing
+- [ ] Add support for Kanji
+- [ ] Add font choices
 
 ## Guide
 If you're new to programming, this section is for you.  

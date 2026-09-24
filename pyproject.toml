@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "handwriting-pdf-generator"
+description = "Generate PDFs for handwriting practice."
+version = "1.0.0"
+dependencies = [
+    "reportlab",
+    "questionary",
+    "typer"
+]
+requires-python = ">= 3.12"
+authors = [
+    { name = "Sara Nippert" }
+]
+readme = "README.md"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov"
+]
+
+[project.scripts]
+handwriting-pdf = "handwriting_pdf_generator.entrypoint:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"handwriting_pdf_generator" = ["assets/fonts/*.ttf", "assets/fonts/*.otf", "assets/fonts/*.ttc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

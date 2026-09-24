@@ -112,6 +112,18 @@ class PageLayout:
     def guide_baseline_offset(self) -> float:
         return self.guide_cell_height * self.guide_baseline_offset_ratio
 
+    @property
+    def available_page_height(self) -> float:
+        return self.page_height - self.margin_bottom - self.margin_top
+
+    @property
+    def available_page_width(self) -> float:
+        return self.page_width - self.margin_left - self.margin_right
+
+    @property
+    def max_rows_per_page(self) -> int:
+        return int(self.available_page_height // self.line_height)
+
 
 def build_single_page_layout(page_orientation: PageOrientation) -> PageLayout:
     """

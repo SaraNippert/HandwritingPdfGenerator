@@ -62,6 +62,6 @@ def select_output_mode() -> OutputLayoutMode:
 
 def header() -> None:
     """Print a styled banner shown at CLI startup."""
-    typer.secho("-----------------------------", fg=typer.colors.GREEN, bold=True)
-    typer.secho("Handwriting PDF Generator CLI", fg=typer.colors.GREEN, bold=True)
-    typer.secho("-----------------------------", fg=typer.colors.GREEN, bold=True)
+    typer.secho("╭──────────────────────────────────────╮", fg=typer.colors.GREEN, bold=True)
+    typer.secho("│    Handwriting PDF Generator CLI     │", fg=typer.colors.GREEN, bold=True)
+    typer.secho("╰──────────────────────────────────────╯", fg=typer.colors.GREEN, bold=True)

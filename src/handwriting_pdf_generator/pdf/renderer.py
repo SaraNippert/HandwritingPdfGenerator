@@ -7,7 +7,7 @@ from ..domain.worksheet_preset import RowRenderMode, GuideStyle
 from ..pdf.layout import PageLayout
 
 
-def draw_title(pdf, title: str, layout: PageLayout, font_name: str) -> None:
+def draw_title(pdf, title: str, layout: PageLayout) -> None:
     """
     Draw the worksheet title at the configured title position.
 
@@ -21,7 +21,6 @@ def draw_title(pdf, title: str, layout: PageLayout, font_name: str) -> None:
         layout: Page layout containing title coordinates and font settings.
         font_name: Name of the font to use for the title text.
     """
-    pdf.setFont(font_name, layout.title_font_size)
 
     title_x = layout.left
     title_y = layout.top - layout.title_top_offset
@@ -30,7 +29,7 @@ def draw_title(pdf, title: str, layout: PageLayout, font_name: str) -> None:
 
 
 # TODO: This method needs broken up
-def draw_character_lines(
+def draw_lines(
         pdf: Canvas,
         lines: list[str],
         layout: PageLayout,
@@ -61,41 +60,40 @@ def draw_character_lines(
         ValueError: If `row_render_mode` or `guide_style` is unsupported.
     """
 
-    pdf = _set_page_characteristics(pdf, font_name, layout)
-
     line_height = layout.line_height
     y = layout.first_row_baseline
 
-    for line_text in lines:
-        if not line_text:
+    for line in lines:
+        # render empty row if line empty
+        if not line:
             y -= line_height
             continue
 
-        # If we have reached the bottom of the page, start a new page
-        if y <= (layout.bottom - line_height):
-            pdf = _start_new_page(pdf, font_name, layout)
-            y = layout.first_row_baseline
-
+        # reset horizontal drawing position for each row
         x = layout.left
-        token_width = stringWidth(line_text, font_name, layout.text_font_size)
-
-        if token_width <= 0:
-            y -= line_height
-            continue
 
         if guide_style is GuideStyle.PLUS_DOTTED:
+            token_width = stringWidth(line, font_name, layout.text_font_size)
+
+            if token_width <= 0:
+                y -= line_height
+                continue
+
             if row_render_mode is RowRenderMode.SINGLE:
                 _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
+                # determine the x-coordinate for the text inside the cell to ensure it stays centered
                 text_x = x + (layout.guide_cell_width - token_width) / 2
-                pdf.drawString(text_x, y, line_text)
+                pdf.drawString(text_x, y, line)
+                # advance cursor to next row
                 y -= line_height
                 continue
 
             if row_render_mode is RowRenderMode.REPEAT:
+                # continue to render the prompt
                 while x + layout.guide_cell_width <= layout.right:
                     _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
                     text_x = x + (layout.guide_cell_width - token_width) / 2
-                    pdf.drawString(text_x, y, line_text)
+                    pdf.drawString(text_x, y, line)
                     x += layout.guide_cell_step
 
                 y -= line_height
@@ -104,36 +102,44 @@ def draw_character_lines(
             raise ValueError(f"Unsupported row render mode: {row_render_mode}")
 
         if guide_style is GuideStyle.NONE:
+            pdf.drawString(x, y, line)
+            y -= line_height
+            continue
+
             if row_render_mode is RowRenderMode.SINGLE:
-                pdf.drawString(x, y, line_text)
-                y -= line_height
-                continue
+                 pdf.drawString(x, y, line)
+                 y -= line_height
+                 continue
 
             if row_render_mode is RowRenderMode.REPEAT:
-                while x + token_width <= layout.right:
-                    pdf.drawString(x, y, line_text)
+                 while x + token_width <= layout.right:
+                    pdf.drawString(x, y, line)
                     x += token_width
 
-                y -= line_height
-                continue
-
-            raise ValueError(f"Unsupported row render mode: {row_render_mode}")
+                 y -= line_height
+                 continue
 
         raise ValueError(f"Unsupported guide style: {guide_style}")
 
 
-def _set_page_characteristics(pdf: Canvas, font_name: str, layout: PageLayout) -> Canvas:
+def set_page_characteristics(
+        pdf: Canvas,
+        font_name: str,
+        layout: PageLayout
+) -> None:
+    """
+    Set the page characteristics for the given PDF canvas:
+    - font
+    - fill (text) color
+
+    :param pdf: the ReportLab canvas object to configure
+    :param font_name:
+    :param layout:
+    :return:
+    """
     pdf.setFont(font_name, layout.text_font_size)
     # Text uses fill color; guide cells set their own stroke colors/styles.
     pdf.setFillColor(colors.HexColor(layout.text_fill_color))
-    return pdf
-
-def _start_new_page(pdf: Canvas, font_name: str, layout: PageLayout) -> Canvas:
-    # start the new page
-    pdf.showPage()
-    # reset defaults
-    pdf = _set_page_characteristics(pdf, font_name, layout)
-    return pdf
 
 
 def _draw_dotted_plus_cell(

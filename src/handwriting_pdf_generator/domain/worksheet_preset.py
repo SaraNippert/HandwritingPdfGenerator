@@ -14,6 +14,20 @@ class GuideStyle(StrEnum):
     PLUS_DOTTED = "plus_dotted"
 
 @dataclass(frozen=True)
+class LogicalWorksheetPage:
+    """
+    reusable single page configuration.
+    pagination and booklet ordering require multiple pages to be generated
+        before ordering and rendering
+
+    Attributes:
+        title: the title to be printed at the top of the page
+        lines: the lines to be printed on the page
+    """
+    title: str
+    lines: tuple[str, ...]
+
+@dataclass(frozen=True)
 class WorksheetPreset:
     """
     Immutable reusable worksheet configuration.

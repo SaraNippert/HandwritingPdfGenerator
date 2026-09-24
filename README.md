@@ -16,7 +16,7 @@ I will eventually add support for other formats, mostly dependent on if I change
 This app currently supports generating sheets for the following:
 - Katakana
 - Hiragana
-- French cursive (appears, but not complete)
+- French cursive (appears as option, but not complete)
 
 ## To Do
 - [ ] Add layout for two pages per sheet
@@ -26,8 +26,7 @@ This app currently supports generating sheets for the following:
 - [ ] Add font choices
 
 ## Guide
-If you're new to programming, this section is for you.  
-This project creates handwriting-practice PDFs, and you can customize it for your own notebook format, language set, and font preferences.
+Walkthrough of project and how to run it locally.
 
 ---
 
@@ -143,4 +142,4 @@ HandwritingPdfGenerator/
 pipx uninstall handwriting-pdf-generator
 pipx install -e .
 ```
-After that, the font should appear as a selectable option in the app.
+The font should now appear as a selectable option in the app.

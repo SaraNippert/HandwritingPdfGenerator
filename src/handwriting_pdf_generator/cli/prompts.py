@@ -3,7 +3,8 @@ from enum import Enum
 import typer
 import questionary
 
-from ..domain.worksheet_preset import WorksheetPreset, RowRenderMode
+from ..domain.worksheet_preset import WorksheetPreset, RowRenderMode, OutputLayoutMode
+from ..pdf.layout import PageOrientation
 from ..presets.french import FRENCH_PRESETS
 from ..presets.katakana import KATAKANA_PRESETS
 from ..presets.hiragana import HIRAGANA_PRESETS
@@ -44,6 +45,20 @@ def select_row_render_mode() -> RowRenderMode:
         choice = RowRenderMode.REPEAT # default to repeat
 
     return RowRenderMode(choice)
+
+def select_page_orientation() -> PageOrientation:
+    choice = questionary.select(
+        "Select page orientation:",
+        choices=[option.value for option in PageOrientation]
+    ).ask()
+    return PageOrientation(choice)
+
+def select_output_mode() -> OutputLayoutMode:
+    choice = questionary.select(
+        "Select output mode:",
+        choices=[option.value for option in OutputLayoutMode]
+    ).ask()
+    return OutputLayoutMode(choice)
 
 def header() -> None:
     """Print a styled banner shown at CLI startup."""

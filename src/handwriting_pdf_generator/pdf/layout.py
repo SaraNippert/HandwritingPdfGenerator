@@ -1,8 +1,12 @@
 # grid/box placement logic
 
 from dataclasses import dataclass
-from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.pagesizes import LETTER, landscape, portrait
+from enum import Enum
 
+class PageOrientation(str, Enum):
+    PORTRAIT = "portrait"
+    LANDSCAPE = "landscape"
 
 @dataclass(frozen=True)
 class PageLayout:
@@ -14,7 +18,10 @@ class PageLayout:
     """
 
     # Use defaults provided by reportlab
-    page_size: tuple[float, float] = LETTER
+    # default to landscape
+    page_orientation: PageOrientation = PageOrientation.LANDSCAPE
+    # should always be portrait sizing
+    base_page_size: tuple[float, float] = LETTER
 
     # set margins (.5in default)
     margin_left: float = 36.0
@@ -43,6 +50,13 @@ class PageLayout:
     guide_line_width: float = 0.1
     guide_dash_on: float = 0.5
     guide_dash_off: float = 1.0
+
+    @property
+    def page_size(self) -> tuple[float, float]:
+        if self.page_orientation is PageOrientation.LANDSCAPE:
+            return landscape(self.base_page_size)
+        else:
+            return portrait(self.base_page_size)
 
     @property
     def page_width(self) -> float:
@@ -99,7 +113,7 @@ class PageLayout:
         return self.guide_cell_height * self.guide_baseline_offset_ratio
 
 
-def build_single_page_layout() -> PageLayout:
+def build_single_page_layout(page_orientation: PageOrientation) -> PageLayout:
     """
     Build and return the default one-page layout configuration.
 
@@ -107,4 +121,4 @@ def build_single_page_layout() -> PageLayout:
         PageLayout: A frozen layout object containing the canonical
         coordinates used by renderer/generator components.
     """
-    return PageLayout()
+    return PageLayout(page_orientation=page_orientation)

@@ -4,8 +4,15 @@
 
 import typer
 
-from ..prompts import header, select_worksheet_preset, select_row_render_mode
+from ..prompts import (
+    header,
+    select_worksheet_preset,
+    select_row_render_mode,
+    select_page_orientation,
+    select_output_mode
+)
 from ...pdf.generator import Generator
+
 
 def handwriting_pdf() -> None:
     """Run the interactive CLI flow for selecting PDF options.
@@ -18,16 +25,15 @@ def handwriting_pdf() -> None:
     """
 
     header()
-
-    # user selects PDF type
     worksheet_selection = select_worksheet_preset()
-    typer.echo(f"Worksheet Selection: {worksheet_selection.id}")
-
     row_render_mode = select_row_render_mode()
-    typer.echo(f"Row Render Mode: {row_render_mode}")
+    page_orientation = select_page_orientation()
+    output_mode = select_output_mode()
 
-    generator = Generator(preset=worksheet_selection, row_render_mode=row_render_mode)
+    generator = Generator(
+        preset=worksheet_selection,
+        row_render_mode=row_render_mode,
+        page_orientation=page_orientation,
+        output_mode=output_mode
+    )
     generator.generate()
-
-
-

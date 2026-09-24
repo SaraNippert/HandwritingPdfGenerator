@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
+class OutputLayoutMode(StrEnum):
+    SINGLE_PAGE = "single-page"
+    BOOKLET = "booklet"
+
 class RowRenderMode(StrEnum):
     REPEAT = "repeat"
     SINGLE = "single"

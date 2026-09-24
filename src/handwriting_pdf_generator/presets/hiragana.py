@@ -29,14 +29,14 @@ HIRAGANA_PRESETS: dict[str, WorksheetPreset] = {
     "hiragana_grid": WorksheetPreset(
         id="hiragana_grid",
         display_name="Hiragana Grid",
-        characters=HIRAGANA_GOJUON,
+        prompts=HIRAGANA_GOJUON,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     ),
     "hiragana_grid_expanded": WorksheetPreset(
         id="hiragana_grid_expanded",
         display_name="Hiragana Grid Expanded",
-        characters=HIRAGANA_GOJUON + HIRAGANA_DAKUTEN_HANDAKUTEN,
+        prompts=HIRAGANA_GOJUON + HIRAGANA_DAKUTEN_HANDAKUTEN,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     )

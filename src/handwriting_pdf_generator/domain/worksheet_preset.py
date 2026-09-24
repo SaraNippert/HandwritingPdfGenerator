@@ -18,12 +18,15 @@ class WorksheetPreset:
         id: Stable internal identifier for the preset (e.g., "katakana_base").
         display_name: Human-readable name shown in UI/CLI output
             (e.g., "Katakana (Base Gojuon)").
-        characters: Ordered tuple of characters included in the worksheet.
+        prompts: Ordered tuple of characters/phrases/sentences included in the worksheet.
             A tuple is used to keep the preset immutable and hashable.
+        available_fonts: fonts which can be used with this preset
+            (not all fonts work for all languages)
+        guide_style: the lines around the character to be used to help the
+            user visualize character placement
     """
-
-    id: str  # Stable machine-friendly preset key.
-    display_name: str  # User-facing preset label.
-    characters: tuple[str, ...]  # Sequence of characters to generate practice rows from.
-    available_fonts: tuple[str, ...] # fonts which can be used with this preset (not all fonts work for all languages)
+    id: str
+    display_name: str
+    prompts: tuple[str, ...]  # Sequence of characters to generate practice rows from.
+    available_fonts: tuple[str, ...] #
     guide_style: GuideStyle = GuideStyle.NONE

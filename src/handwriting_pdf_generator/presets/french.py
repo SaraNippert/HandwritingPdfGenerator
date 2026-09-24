@@ -17,7 +17,7 @@ FRENCH_PRESETS: dict[str, WorksheetPreset] = {
     "french_lowercase": WorksheetPreset(
         id="french_lowercase",
         display_name="French Lowercase",
-        characters=LOWERCASE,
+        prompts=LOWERCASE,
         available_fonts=LATIN_FONT_LIST,
         guide_style=GuideStyle.NONE
     )

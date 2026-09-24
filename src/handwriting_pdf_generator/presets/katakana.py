@@ -29,14 +29,14 @@ KATAKANA_PRESETS: dict[str, WorksheetPreset] = {
     "katakana_grid": WorksheetPreset(
         id="katakana_grid",
         display_name="Katakana Grid",
-        characters=KATAKANA_GOJUON,
+        prompts=KATAKANA_GOJUON,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     ),
     "katakana_grid_expanded": WorksheetPreset(
         id="katakana_grid_expanded",
         display_name="Katakana Grid Expanded",
-        characters=KATAKANA_GOJUON + KATAKANA_DAKUTEN_HANDAKUTEN,
+        prompts=KATAKANA_GOJUON + KATAKANA_DAKUTEN_HANDAKUTEN,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     )

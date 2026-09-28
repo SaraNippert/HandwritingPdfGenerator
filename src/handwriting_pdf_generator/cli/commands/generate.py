@@ -9,7 +9,8 @@ from ..prompts import (
     select_worksheet_preset,
     select_row_render_mode,
     select_page_orientation,
-    select_output_mode
+    select_output_mode,
+    booklet_instructions
 )
 from ...domain.worksheet_preset import OutputLayoutMode
 from ...pdf.generator import Generator
@@ -45,3 +46,7 @@ def handwriting_pdf() -> None:
         output_mode=output_mode
     )
     generator.generate()
+
+    # print printing instructions to screen for user if booklet is selected
+    if output_mode == OutputLayoutMode.BOOKLET:
+        booklet_instructions()

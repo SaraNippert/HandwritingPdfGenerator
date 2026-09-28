@@ -65,3 +65,7 @@ def header() -> None:
     typer.secho("╭──────────────────────────────────────╮", fg=typer.colors.GREEN, bold=True)
     typer.secho("│    Handwriting PDF Generator CLI     │", fg=typer.colors.GREEN, bold=True)
     typer.secho("╰──────────────────────────────────────╯", fg=typer.colors.GREEN, bold=True)
+
+
+def booklet_instructions() -> None:
+    typer.secho("To print the booklet, print two pages per sheet, double-sided.", fg=typer.colors.GREEN, bold=True)

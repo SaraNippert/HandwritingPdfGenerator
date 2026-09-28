@@ -1,4 +1,5 @@
 # high-level orchestration to create a PDF
+from .booklet import impose_booklet_pages
 from .pagenation import paginate_lines, plan_rows
 from ..domain.worksheet_preset import WorksheetPreset, RowRenderMode, OutputLayoutMode
 
@@ -44,22 +45,27 @@ class Generator:
         # divide up content into logical pages
         logical_worksheet_pages = paginate_lines(preset=self.preset, layout=layout, lines=lines)
 
+        # organize pages into booklet order
+        if self.output_mode is OutputLayoutMode.BOOKLET:
+            logical_worksheet_pages = impose_booklet_pages(logical_worksheet_pages)
+
         # set the initial page characteristics
         set_page_characteristics(pdf, font_name, layout)
 
         # draw per page
         for page in logical_worksheet_pages:
-            if page.title != "":
-                draw_title(pdf, page.title, layout)
+            if page is not None:
+                if page.title != "":
+                    draw_title(pdf, page.title, layout)
 
-            draw_lines(
-                pdf,
-                page.lines,
-                layout,
-                font_name,
-                self.row_render_mode,
-                self.preset.guide_style
-            )
+                draw_lines(
+                    pdf,
+                    page.lines,
+                    layout,
+                    font_name,
+                    self.row_render_mode,
+                    self.preset.guide_style
+                )
 
             pdf.showPage()
             set_page_characteristics(pdf, font_name, layout)

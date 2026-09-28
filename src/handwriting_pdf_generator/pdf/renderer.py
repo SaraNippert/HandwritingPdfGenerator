@@ -19,7 +19,6 @@ def draw_title(pdf, title: str, layout: PageLayout) -> None:
         pdf: ReportLab canvas object used for drawing.
         title: Text to render as the page title.
         layout: Page layout containing title coordinates and font settings.
-        font_name: Name of the font to use for the title text.
     """
 
     title_x = layout.left
@@ -69,55 +68,56 @@ def draw_lines(
             y -= line_height
             continue
 
+        # keep track of token width to ensure there is something to draw
+        # and we do not draw past the page margin
+        token_width = stringWidth(line, font_name, layout.text_font_size)
+
+        # skip to next row if token has no width
+        if token_width <= 0:
+            y -= line_height
+            continue
+
         # reset horizontal drawing position for each row
         x = layout.left
 
-        token_width = stringWidth(line, font_name, layout.text_font_size)
-
         if guide_style is GuideStyle.PLUS_DOTTED:
 
-            if token_width <= 0:
-                y -= line_height
-                continue
-
             if row_render_mode is RowRenderMode.SINGLE:
+                # draw the grid cell with a dotted plus sign in the center
                 _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
                 # determine the x-coordinate for the text inside the cell to ensure it stays centered
                 text_x = x + (layout.guide_cell_width - token_width) / 2
                 pdf.drawString(text_x, y, line)
-                # advance cursor to next row
-                y -= line_height
-                continue
 
-            if row_render_mode is RowRenderMode.REPEAT:
-                # continue to render the prompt
+            elif row_render_mode is RowRenderMode.REPEAT:
                 while x + layout.guide_cell_width <= layout.right:
                     _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
                     text_x = x + (layout.guide_cell_width - token_width) / 2
                     pdf.drawString(text_x, y, line)
                     x += layout.guide_cell_step
 
-                y -= line_height
-                continue
+            else:
+                raise ValueError(f"Unsupported row render mode: {row_render_mode}")
 
-            raise ValueError(f"Unsupported row render mode: {row_render_mode}")
-
-        if guide_style is GuideStyle.NONE:
+        elif guide_style is GuideStyle.NONE:
 
             if row_render_mode is RowRenderMode.SINGLE:
                  pdf.drawString(x, y, line)
-                 y -= line_height
-                 continue
 
-            if row_render_mode is RowRenderMode.REPEAT:
+            elif row_render_mode is RowRenderMode.REPEAT:
                  while x + token_width <= layout.right:
                     pdf.drawString(x, y, line)
                     x += token_width
 
-                 y -= line_height
-                 continue
+            else:
+                raise ValueError(f"Unsupported row render mode: {row_render_mode}")
 
-        raise ValueError(f"Unsupported guide style: {guide_style}")
+        else:
+            raise ValueError(f"Unsupported guide style: {guide_style}")
+
+        # advance cursor to next row
+        y -= line_height
+        continue
 
 
 def set_page_characteristics(

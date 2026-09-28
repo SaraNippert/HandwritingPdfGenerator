@@ -31,7 +31,7 @@ LATIN_FONTS: dict[str, FontDefinition] = {
     "playwrite_be_wal_guides" : FontDefinition(
         id="playwrite_be_wal_guides",
         display_name="Playwright BE WAL Guides",
-        font_directory="Playwrighte_BE_WAL_Guides",
+        font_directory="Playwrite_BE_WAL_Guides",
         file_name="PlaywriteBEWALGuides-Regular.ttf",
     ),
     "playfair_display": FontDefinition(

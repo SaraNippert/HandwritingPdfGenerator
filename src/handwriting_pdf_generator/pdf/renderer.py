@@ -72,8 +72,9 @@ def draw_lines(
         # reset horizontal drawing position for each row
         x = layout.left
 
+        token_width = stringWidth(line, font_name, layout.text_font_size)
+
         if guide_style is GuideStyle.PLUS_DOTTED:
-            token_width = stringWidth(line, font_name, layout.text_font_size)
 
             if token_width <= 0:
                 y -= line_height
@@ -102,9 +103,6 @@ def draw_lines(
             raise ValueError(f"Unsupported row render mode: {row_render_mode}")
 
         if guide_style is GuideStyle.NONE:
-            pdf.drawString(x, y, line)
-            y -= line_height
-            continue
 
             if row_render_mode is RowRenderMode.SINGLE:
                  pdf.drawString(x, y, line)

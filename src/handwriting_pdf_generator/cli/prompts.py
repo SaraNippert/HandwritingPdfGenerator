@@ -4,7 +4,7 @@ import typer
 import questionary
 
 from ..domain.worksheet_preset import WorksheetPreset, RowRenderMode, OutputLayoutMode
-from ..pdf.layout import PageOrientation
+from ..pdf.layout import PageOrientation, FontSize
 from ..presets.french import FRENCH_PRESETS
 from ..presets.katakana import KATAKANA_PRESETS
 from ..presets.hiragana import HIRAGANA_PRESETS
@@ -45,6 +45,18 @@ def select_row_render_mode() -> RowRenderMode:
         choice = RowRenderMode.REPEAT # default to repeat
 
     return RowRenderMode(choice)
+
+def select_font_size() -> FontSize:
+    # do not allow user to input their own font size, only allow tested font sizes
+    choice = questionary.select(
+        "Select font size:",
+        choices=[option.name for option in FontSize],
+    ).ask()
+
+    if choice is None:
+        choice = FontSize.MEDIUM.name
+
+    return FontSize[choice]
 
 def select_page_orientation() -> PageOrientation:
     choice = questionary.select(

@@ -8,6 +8,11 @@ class PageOrientation(str, Enum):
     PORTRAIT = "portrait"
     LANDSCAPE = "landscape"
 
+class FontSize(int, Enum):
+    SMALL = 10
+    MEDIUM = 12
+    LARGE = 14
+
 @dataclass(frozen=True)
 class PageLayout:
     """
@@ -125,7 +130,7 @@ class PageLayout:
         return int(self.available_page_height // self.line_height)
 
 
-def build_single_page_layout(page_orientation: PageOrientation) -> PageLayout:
+def build_single_page_layout(page_orientation: PageOrientation, font_size: FontSize) -> PageLayout:
     """
     Build and return the default one-page layout configuration.
 
@@ -133,4 +138,4 @@ def build_single_page_layout(page_orientation: PageOrientation) -> PageLayout:
         PageLayout: A frozen layout object containing the canonical
         coordinates used by renderer/generator components.
     """
-    return PageLayout(page_orientation=page_orientation)
+    return PageLayout(page_orientation=page_orientation, text_font_size=font_size)

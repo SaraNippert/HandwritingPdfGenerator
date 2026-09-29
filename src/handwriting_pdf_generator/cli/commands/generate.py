@@ -10,6 +10,7 @@ from ..prompts import (
     select_row_render_mode,
     select_page_orientation,
     select_output_mode,
+    select_font_size,
     booklet_instructions
 )
 from ...domain.worksheet_preset import OutputLayoutMode
@@ -39,11 +40,14 @@ def handwriting_pdf() -> None:
     else:
         page_orientation = select_page_orientation()
 
+    font_size = select_font_size()
+
     generator = Generator(
         preset=worksheet_selection,
         row_render_mode=row_render_mode,
         page_orientation=page_orientation,
-        output_mode=output_mode
+        output_mode=output_mode,
+        font_size=font_size
     )
     generator.generate()
 

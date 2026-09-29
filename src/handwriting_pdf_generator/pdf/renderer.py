@@ -28,12 +28,11 @@ def draw_title(pdf, title: str, layout: PageLayout) -> None:
 
 
 # TODO: This method needs broken up
-def draw_lines(
+def draw_lines_row_render_repeat(
         pdf: Canvas,
         lines: list[str],
         layout: PageLayout,
         font_name: str,
-        row_render_mode: RowRenderMode,
         guide_style: GuideStyle,
 ) -> None:
     """
@@ -43,16 +42,12 @@ def draw_lines(
     - Guide style:
       - `GuideStyle.PLUS_DOTTED`: draw guide cells with center cross lines.
       - `GuideStyle.NONE`: draw plain text only.
-    - Row render mode:
-      - `RowRenderMode.SINGLE`: draw one token/cell per row.
-      - `RowRenderMode.REPEAT`: repeat token/cell horizontally until `layout.right`.
 
     Args:
         pdf: ReportLab canvas object used for drawing.
         lines: Text lines to render, one row per item.
         layout: Page layout containing text origin, boundaries, spacing, and style.
         font_name: Font name used for line text.
-        row_render_mode: Controls single vs repeated row rendering behavior.
         guide_style: Controls whether and how guide cells are drawn.
 
     Raises:
@@ -82,41 +77,103 @@ def draw_lines(
 
         if guide_style is GuideStyle.PLUS_DOTTED:
 
-            if row_render_mode is RowRenderMode.SINGLE:
-                # draw the grid cell with a dotted plus sign in the center
+            while x + layout.guide_cell_width <= layout.right:
                 _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
-                # determine the x-coordinate for the text inside the cell to ensure it stays centered
                 text_x = x + (layout.guide_cell_width - token_width) / 2
                 pdf.drawString(text_x, y, line)
-
-            elif row_render_mode is RowRenderMode.REPEAT:
-                while x + layout.guide_cell_width <= layout.right:
-                    _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
-                    text_x = x + (layout.guide_cell_width - token_width) / 2
-                    pdf.drawString(text_x, y, line)
-                    x += layout.guide_cell_step
-
-            else:
-                raise ValueError(f"Unsupported row render mode: {row_render_mode}")
+                x += layout.guide_cell_step
 
         elif guide_style is GuideStyle.NONE:
 
-            if row_render_mode is RowRenderMode.SINGLE:
-                 pdf.drawString(x, y, line)
-
-            elif row_render_mode is RowRenderMode.REPEAT:
-                 while x + token_width <= layout.right:
-                    pdf.drawString(x, y, line)
-                    x += token_width
-
-            else:
-                raise ValueError(f"Unsupported row render mode: {row_render_mode}")
+            while x + token_width <= layout.right:
+                pdf.drawString(x, y, line)
+                x += token_width
 
         else:
             raise ValueError(f"Unsupported guide style: {guide_style}")
 
         # advance cursor to next row
         y -= line_height
+        continue
+
+
+def draw_lines_row_render_single(
+        pdf: Canvas,
+        prompts: list[str],
+        layout: PageLayout,
+        font_name: str,
+        guide_style: GuideStyle,
+) -> None:
+    """
+    Draw worksheet practice rows for the provided text lines.
+
+    This renderer supports two orthogonal dimensions of behavior:
+    - Guide style:
+      - `GuideStyle.PLUS_DOTTED`: draw guide cells with center cross lines.
+      - `GuideStyle.NONE`: draw plain text only.
+
+    Args:
+        pdf: ReportLab canvas object used for drawing.
+        prompts: Text lines to render, one row per item.
+        layout: Page layout containing text origin, boundaries, spacing, and style.
+        font_name: Font name used for line text.
+        guide_style: Controls whether and how guide cells are drawn.
+
+    Raises:
+        ValueError: If `row_render_mode` or `guide_style` is unsupported.
+    """
+
+    line_height = layout.line_height
+    y = layout.first_row_baseline
+    x = layout.left
+
+    for prompt in prompts:
+        # skip if not present
+        if not prompt:
+            continue
+
+        # keep track of token width to ensure there is something to draw
+        # and we do not draw past the page margin
+        token_width = stringWidth(prompt, font_name, layout.text_font_size)
+
+        # skip to next prompt if token has no width
+        if token_width <= 0:
+            continue
+
+        # start new row if the current token would exceed the right margin
+        # if x + token_width >= layout.right:
+        #     x = layout.left
+        #     y -= line_height
+
+        if guide_style is GuideStyle.PLUS_DOTTED:
+            required_width = layout.guide_cell_width
+            advance_width = layout.guide_cell_step
+
+            if x + required_width > layout.right:
+                x = layout.left
+                y -= line_height
+
+            # draw the grid cell with a dotted plus sign in the center
+            _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
+            # determine the x-coordinate for the text inside the cell to ensure it stays centered
+            text_x = x + (layout.guide_cell_width - token_width) / 2
+            pdf.drawString(text_x, y, prompt)
+            x += advance_width
+
+        elif guide_style is GuideStyle.NONE:
+            required_width = token_width
+
+            if x + required_width > layout.right:
+                x = layout.left
+                y -= line_height
+
+            pdf.drawString(x, y, prompt)
+            x += token_width
+
+        else:
+            raise ValueError(f"Unsupported guide style: {guide_style}")
+
+        # advance cursor to next row
         continue
 
 

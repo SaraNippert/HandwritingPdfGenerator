@@ -45,7 +45,7 @@ def draw_lines_row_render_repeat(
 
     Args:
         pdf: ReportLab canvas object used for drawing.
-        lines: Text lines to render, one row per item.
+        lines: Text lines to render, one row per repeated prompt.
         layout: Page layout containing text origin, boundaries, spacing, and style.
         font_name: Font name used for line text.
         guide_style: Controls whether and how guide cells are drawn.
@@ -94,7 +94,6 @@ def draw_lines_row_render_repeat(
 
         # advance cursor to next row
         y -= line_height
-        continue
 
 
 def draw_lines_row_render_single(
@@ -114,7 +113,7 @@ def draw_lines_row_render_single(
 
     Args:
         pdf: ReportLab canvas object used for drawing.
-        prompts: Text lines to render, one row per item.
+        prompts: Text lines to render, multiple per row.
         layout: Page layout containing text origin, boundaries, spacing, and style.
         font_name: Font name used for line text.
         guide_style: Controls whether and how guide cells are drawn.
@@ -140,15 +139,11 @@ def draw_lines_row_render_single(
         if token_width <= 0:
             continue
 
-        # start new row if the current token would exceed the right margin
-        # if x + token_width >= layout.right:
-        #     x = layout.left
-        #     y -= line_height
-
         if guide_style is GuideStyle.PLUS_DOTTED:
             required_width = layout.guide_cell_width
             advance_width = layout.guide_cell_step
 
+            # determine if the next cell will fit on the current line; if not, move to the next line
             if x + required_width > layout.right:
                 x = layout.left
                 y -= line_height
@@ -163,6 +158,7 @@ def draw_lines_row_render_single(
         elif guide_style is GuideStyle.NONE:
             required_width = token_width
 
+            # determine if prompt will fit on current line, otherwise move to next line
             if x + required_width > layout.right:
                 x = layout.left
                 y -= line_height
@@ -172,9 +168,6 @@ def draw_lines_row_render_single(
 
         else:
             raise ValueError(f"Unsupported guide style: {guide_style}")
-
-        # advance cursor to next row
-        continue
 
 
 def set_page_characteristics(
@@ -188,8 +181,8 @@ def set_page_characteristics(
     - fill (text) color
 
     :param pdf: the ReportLab canvas object to configure
-    :param font_name:
-    :param layout:
+    :param font_name: the font name to be used
+    :param layout: the page layout to be used
     :return:
     """
     pdf.setFont(font_name, layout.text_font_size)

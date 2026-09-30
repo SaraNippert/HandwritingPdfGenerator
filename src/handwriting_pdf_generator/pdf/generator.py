@@ -37,7 +37,7 @@ class Generator:
             row_render_mode: RowRenderMode = RowRenderMode.REPEAT,
             page_orientation: PageOrientation = PageOrientation.LANDSCAPE,
             output_mode: OutputLayoutMode = OutputLayoutMode.BOOKLET,
-            font_size: FontSize = FontSize.MEDIUM
+            font_size: FontSize = FontSize.FOURTEEN
     ):
         self.preset = preset
         self.output_path = output_path

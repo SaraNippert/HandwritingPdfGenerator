@@ -54,7 +54,7 @@ def select_font_size() -> FontSize:
     ).ask()
 
     if choice is None:
-        choice = FontSize.MEDIUM.name
+        choice = FontSize.FOURTEEN.name
 
     return FontSize[choice]
 

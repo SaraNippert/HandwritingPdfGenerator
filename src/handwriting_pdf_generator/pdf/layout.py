@@ -9,9 +9,10 @@ class PageOrientation(str, Enum):
     LANDSCAPE = "landscape"
 
 class FontSize(int, Enum):
-    SMALL = 10
-    MEDIUM = 12
-    LARGE = 14
+    TEN = 10
+    TWELVE = 12
+    FOURTEEN = 14
+    SIXTEEN = 16
 
 @dataclass(frozen=True)
 class PageLayout:

@@ -27,7 +27,6 @@ def draw_title(pdf, title: str, layout: PageLayout) -> None:
     pdf.drawString(title_x, title_y, title)
 
 
-# TODO: This method needs broken up
 def draw_lines_row_render_repeat(
         pdf: Canvas,
         lines: list[str],

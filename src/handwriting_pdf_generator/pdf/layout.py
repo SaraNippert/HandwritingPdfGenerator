@@ -4,6 +4,10 @@ from dataclasses import dataclass
 from reportlab.lib.pagesizes import LETTER, landscape, portrait
 from enum import Enum
 
+# only for landscape orientation half
+# used for booklets
+HALF_LETTER = (LETTER[0], LETTER[1]/2)
+
 class PageOrientation(str, Enum):
     PORTRAIT = "portrait"
     LANDSCAPE = "landscape"
@@ -140,3 +144,38 @@ def build_single_page_layout(page_orientation: PageOrientation, font_size: FontS
         coordinates used by renderer/generator components.
     """
     return PageLayout(page_orientation=page_orientation, text_font_size=font_size)
+
+def build_booklet_page_one_layout(initial_layout: PageLayout) -> PageLayout:
+    """
+    Build and return the layout configuration for the first page of a booklet.
+
+    Args:
+        initial_layout: The base layout to determine the booklet layout from.
+    """
+
+    # booklets must be overall landscape, do not allow portrait layouts
+    if initial_layout.page_orientation is PageOrientation.PORTRAIT:
+        raise NotImplementedError()
+
+    return PageLayout(
+        page_orientation=PageOrientation.PORTRAIT,
+        base_page_size=HALF_LETTER,
+        margin_left=initial_layout.margin_left,
+        margin_right=initial_layout.margin_right,
+        margin_top=initial_layout.margin_top,
+        margin_bottom=initial_layout.margin_bottom,
+        title_top_offset=initial_layout.title_top_offset,
+        title_font_size=initial_layout.title_font_size,
+        text_font_size=initial_layout.text_font_size,
+        line_gap=initial_layout.line_gap,
+        text_fill_color=initial_layout.text_fill_color,
+        guide_border_color=initial_layout.guide_border_color,
+        guide_center_color=initial_layout.guide_center_color,
+        guide_cell_width_ratio=initial_layout.guide_cell_width_ratio,
+        guide_cell_height_ratio=initial_layout.guide_cell_height_ratio,
+        guide_cell_gap_ratio=initial_layout.guide_cell_gap_ratio,
+        guide_baseline_offset_ratio=initial_layout.guide_baseline_offset_ratio,
+        guide_line_width=initial_layout.guide_line_width,
+        guide_dash_on=initial_layout.guide_dash_on,
+        guide_dash_off=initial_layout.guide_dash_off
+    )

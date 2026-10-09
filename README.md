@@ -10,7 +10,6 @@ I will eventually add support for other formats, mostly dependent on if I change
 ## Implementation Notes:
 - Because this is intended for handwriting practice, not memorization and learning, the worksheets generated do not contain blank boxes or lines or stroke order guides.
 - I prefer to write smaller, so the default worksheets generated use smaller characters than may be typical.
-- I am printing to create signatures, which means the default order of the pages is arranged for this booklet style printing.
 
 ## Supported Languages/Characters
 This app currently supports generating sheets for the following:
@@ -19,8 +18,7 @@ This app currently supports generating sheets for the following:
 - French cursive (appears as option, but not complete)
 
 ## To Do
-- [ ] Add layout for two pages per sheet
-- [ ] Add booklet printing
+- [ ] Complete single character worksheets
 - [ ] Fix French cursive spacing
 - [ ] Add support for Kanji
 - [ ] Add font choices

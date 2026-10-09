@@ -1,95 +1,118 @@
 # Handwriting PDF Generator
-This is a project to generate PDFs with grayed out characters to trace for handwriting practice.
 
-I am particular about the handwriting sheets I like to use and this allows me to generate them how 
-I'd like for my own personal notebook which is an A5 travelers notebook.
-The A5 size allows me to print four sheets per letter-sized page, fold the pages in half, 
-and create signatures to be used in the notebook.
-I will eventually add support for other formats, mostly dependent on if I change which notebook I am using.
+Generate printable handwriting-practice PDFs with lightly styled characters you can trace by hand.
 
-## Implementation Notes:
-- Because this is intended for handwriting practice, not memorization and learning, the worksheets generated do not contain blank boxes or lines or stroke order guides.
-- I prefer to write smaller, so the default worksheets generated use smaller characters than may be typical.
+This project is built around an interactive CLI and currently supports Japanese and French worksheet presets, plus booklet-style output for duplex printing.
 
-## Supported Languages/Characters
-This app currently supports generating sheets for the following:
-- Katakana
-- Hiragana
-- French cursive (appears as option, but not complete)
+## Features
 
-## To Do
-- [ ] Complete single character worksheets
-- [ ] Fix French cursive spacing
-- [ ] Add support for Kanji
-- [ ] Add font choices
+- Interactive worksheet generation from preset character sets
+- Japanese presets for hiragana, katakana, and kanji
+- French lowercase worksheets
+- Single-page or booklet output modes
+- Repeat-row or single-character row rendering
+- Configurable page orientation and tested font sizes
+- Timestamped PDF output written to your Downloads folder by default
 
-## Guide
-Walkthrough of project and how to run it locally.
+## Supported presets
 
----
+The CLI currently exposes the following preset groups:
 
-### Run locally
+- **Japanese**
+  - Katakana Gojuon
+  - Katakana Dakuten / Handakuten
+  - Hiragana Gojuon
+  - Hiragana Dakuten / Handakuten
+  - Kanji presets loaded from CSV files in `src/handwriting_pdf_generator/data/kanji/`
+- **French**
+  - French Lowercase
 
-#### 1) Prerequisites
-- Python 3.11+ (or your currently supported project version)
-- `pipx` installed (recommended for running the CLI tool)
+> Note: font choice is currently preset-driven. The CLI does not yet expose a free-form font picker.
 
-Install pipx guide:  
-https://packaging.python.org/en/latest/guides/installing-stand-alone-command-line-tools/#installing-stand-alone-command-line-tools
+## Requirements
 
-#### 2) Clone and install for development
+- Python 3.12+
+- `pip` or another Python package installer
+
+## Quick start
+
+### 1) Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/SaraNippert/HandwritingPdfGenerator.git
 cd HandwritingPdfGenerator
+```
 
-python3 --version
-python3 -m venv .venv
+### 2) Create and activate a virtual environment
+
+```bash
+python3.12 -m venv .venv
 source .venv/bin/activate
+```
 
+### 3) Install the project in editable mode
+
+```bash
 python -m pip install --upgrade pip
 pip install -e .
 ```
 
-#### 3) Verify with tests
+### 4) Run the CLI
+
+Use the installed command and the `generate` subcommand:
+
 ```bash
-pytest tests/
+handwriting-pdf generate
 ```
 
-#### 4) Run the application
+Or run it as a module:
+
 ```bash
-python -m handwriting_pdf_generator
+python -m handwriting_pdf_generator generate
 ```
 
-Because this project uses a package entry point, run it as a module:
+If you want to see the available commands first, run:
+
 ```bash
-python -m handwriting_pdf_generator
-```
-You can also run the installed CLI command (if available in your environment):
-```bash
-handwriting-pdf-generator
+handwriting-pdf --help
+python -m handwriting_pdf_generator --help
 ```
 
-##### Reinstall while actively developing
+### 5) Run the tests
 
-If you are using pipx and want to refresh your editable install after changes:
 ```bash
-pipx uninstall handwriting-pdf-generator
-pipx install -e .
+pytest
 ```
 
-### Project walkthrough
-A good place to start is the package entry flow:
-- src/handwriting_pdf_generator/__main__.py
-- src/handwriting_pdf_generator/entrypoint.py
-- src/handwriting_pdf_generator/cli/app.py
+## CLI workflow
 
-From there, follow the path:
-1. CLI command handling (cli/)
-2. preset/domain models (presets/, domain/)
-3. PDF generation (pdf/)
+When you start the generator, the app walks you through:
 
-#### Architecture
+1. Choosing whether to build a single preset or combine multiple presets
+2. Choosing a language group
+3. Choosing the worksheet preset(s)
+4. Selecting row rendering mode
+5. Selecting output mode:
+   - `single-page`
+   - `booklet`
+6. Selecting page orientation when booklet mode is not used
+7. Selecting a tested font size
+
+If booklet output is selected, the app prints a reminder to print **two pages per sheet, double-sided**.
+
+## Output behavior
+
+- PDFs are saved to `~/Downloads` by default
+- Output filenames are timestamped, for example:
+
+```text
+Hiragana Gojuon_20261009_120102.pdf
+```
+
+- Booklet mode is designed for duplex printing and imposes pages into booklet order
+- Single-page mode keeps the worksheet in normal page order
+
+## Project structure
 
 ```text
 HandwritingPdfGenerator/
@@ -97,47 +120,62 @@ HandwritingPdfGenerator/
 ├── README.md
 ├── src/
 │   └── handwriting_pdf_generator/
-│       ├── __init__.py
 │       ├── __main__.py
 │       ├── entrypoint.py
-│       │
-│       ├── cli/                      # command-line interface (Typer + prompts)
+│       ├── cli/
 │       │   ├── app.py
 │       │   ├── prompts.py
 │       │   └── commands/
 │       │       └── generate.py
-│       │
-│       ├── domain/                   # shared data models / core concepts
+│       ├── domain/
 │       │   ├── worksheet_preset.py
 │       │   └── font_catalog.py
-│       │
-│       ├── presets/                  # predefined character sets/configs
+│       ├── presets/
+│       │   ├── french.py
 │       │   ├── hiragana.py
-│       │   ├── katakana.py
-│       │   └── french.py
-│       │
-│       ├── pdf/                      # PDF creation and rendering logic
-│       │   ├── generator.py
+│       │   ├── kanji.py
+│       │   └── katakana.py
+│       ├── pdf/
+│       │   ├── booklet.py
 │       │   ├── document.py
 │       │   ├── fonts.py
+│       │   ├── generator.py
 │       │   ├── layout.py
-│       │   ├── renderer.py
-│       │   └── booklet.py
-│       │
-│       └── assets/
-│           └── fonts/                # bundled font files used by ReportLab
-│
-└── tests/                            # test suite
+│       │   ├── pagenation.py
+│       │   └── renderer.py
+│       └── data/
+│           └── kanji/
+└── tests/
 ```
 
-#### Adding fonts
-1. Find and download a font (Google Fonts is a good source): https://fonts.google.com/
-2. Unzip the font locally.
-3. Copy the font folder into: src/handwriting_pdf_generator/assets/fonts/
-4. Register/update the font entry in: src/handwriting_pdf_generator/domain/font_catalog.py
-5. Reinstall the package (especially if using pipx):
+## Adding fonts
+
+1. Download the font you want to bundle.
+2. Copy the font files into `src/handwriting_pdf_generator/assets/fonts/`.
+3. Register the font in `src/handwriting_pdf_generator/domain/font_catalog.py`.
+4. Update any preset that should use the new font.
+5. Reinstall the package:
+
 ```bash
-pipx uninstall handwriting-pdf-generator
-pipx install -e .
+pip install -e .
 ```
-The font should now appear as a selectable option in the app.
+
+## Adding kanji data
+
+1. Add a new `.csv` file to `src/handwriting_pdf_generator/data/kanji/`
+2. Put one character per line
+3. Restart the CLI to pick up the new generated preset
+
+## Roadmap
+
+- Complete single-character worksheet handling
+- Improve French cursive spacing
+- Expand kanji preset coverage
+- Add direct font selection in the CLI
+
+## Development notes
+
+- The package entry flow starts in `src/handwriting_pdf_generator/__main__.py`
+- CLI prompts live in `src/handwriting_pdf_generator/cli/prompts.py`
+- PDF generation is handled under `src/handwriting_pdf_generator/pdf/`
+- Fonts are bundled with the package and registered through the font catalog

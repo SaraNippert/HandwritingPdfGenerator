@@ -8,10 +8,12 @@ from ..pdf.layout import PageOrientation, FontSize
 from ..presets.french import FRENCH_PRESETS
 from ..presets.katakana import KATAKANA_PRESETS
 from ..presets.hiragana import HIRAGANA_PRESETS
+from ..presets.kana import KANA_PRESETS
 
 ALL_PRESETS: dict[str, WorksheetPreset] = {
     **KATAKANA_PRESETS,
     **HIRAGANA_PRESETS,
+    **KANA_PRESETS,
     **FRENCH_PRESETS
 }
 

@@ -26,17 +26,17 @@ HIRAGANA_DAKUTEN_HANDAKUTEN: tuple[str, ...] = (
 )
 
 HIRAGANA_PRESETS: dict[str, WorksheetPreset] = {
-    "hiragana_grid": WorksheetPreset(
-        id="hiragana_grid",
-        display_name="Hiragana Grid",
+    "hiragana_gojuon": WorksheetPreset(
+        id="hiragana_gojuon",
+        display_name="Hiragana Gojuon",
         prompts=HIRAGANA_GOJUON,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     ),
-    "hiragana_grid_expanded": WorksheetPreset(
-        id="hiragana_grid_expanded",
-        display_name="Hiragana Grid Expanded",
-        prompts=HIRAGANA_GOJUON + HIRAGANA_DAKUTEN_HANDAKUTEN,
+    "hiragana_dakuten_handakuten": WorksheetPreset(
+        id="hiragana_dakuten_handakuten",
+        display_name="Hiragana Dakuten Handakuten",
+        prompts=HIRAGANA_DAKUTEN_HANDAKUTEN,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     )

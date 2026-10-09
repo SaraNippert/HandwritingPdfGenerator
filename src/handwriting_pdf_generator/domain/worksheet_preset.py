@@ -1,17 +1,21 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
+
 
 class OutputLayoutMode(StrEnum):
     SINGLE_PAGE = "single-page"
     BOOKLET = "booklet"
 
+
 class RowRenderMode(StrEnum):
     REPEAT = "repeat"
     SINGLE = "single"
 
+
 class GuideStyle(StrEnum):
     NONE = "none"
     PLUS_DOTTED = "plus_dotted"
+
 
 @dataclass(frozen=True)
 class LogicalWorksheetPage:
@@ -26,6 +30,13 @@ class LogicalWorksheetPage:
     """
     title: str
     lines: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class WorksheetSection:
+    title: str
+    prompts: tuple[str, ...]
+
 
 @dataclass(frozen=True)
 class WorksheetPreset:
@@ -46,5 +57,6 @@ class WorksheetPreset:
     id: str
     display_name: str
     prompts: tuple[str, ...]  # Sequence of characters to generate practice rows from.
-    available_fonts: tuple[str, ...] #
+    available_fonts: tuple[str, ...]  #
     guide_style: GuideStyle = GuideStyle.NONE
+    sections: tuple[WorksheetSection, ...] = field(default_factory=tuple)

@@ -26,17 +26,17 @@ KATAKANA_DAKUTEN_HANDAKUTEN: tuple[str, ...] = (
 )
 
 KATAKANA_PRESETS: dict[str, WorksheetPreset] = {
-    "katakana_grid": WorksheetPreset(
-        id="katakana_grid",
-        display_name="Katakana Grid",
+    "katakana_gojuon": WorksheetPreset(
+        id="katakana_gojuon",
+        display_name="Katakana Gojuon",
         prompts=KATAKANA_GOJUON,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     ),
-    "katakana_grid_expanded": WorksheetPreset(
-        id="katakana_grid_expanded",
-        display_name="Katakana Grid Expanded",
-        prompts=KATAKANA_GOJUON + KATAKANA_DAKUTEN_HANDAKUTEN,
+    "katakana_dakuten_handakuten": WorksheetPreset(
+        id="katakana_dakuten_handakuten",
+        display_name="Katakana Dakuten Handakuten",
+        prompts=KATAKANA_DAKUTEN_HANDAKUTEN,
         available_fonts=JAPANESE_FONT_LIST,
         guide_style=GuideStyle.PLUS_DOTTED
     )

@@ -24,7 +24,15 @@ def draw_title(pdf, title: str, layout: PageLayout) -> None:
     title_x = layout.left
     title_y = layout.top - layout.title_top_offset
 
+    # Save the current fill color
+    previous_fill_color = pdf._fillColorObj
+
+    # Set the title color and draw
+    pdf.setFillColor(colors.HexColor(layout.title_color))
     pdf.drawString(title_x, title_y, title)
+
+    # Restore the previous fill color
+    pdf.setFillColor(previous_fill_color)
 
 
 def draw_lines_row_render_repeat(

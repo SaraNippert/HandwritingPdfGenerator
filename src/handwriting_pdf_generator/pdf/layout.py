@@ -17,6 +17,7 @@ class FontSize(int, Enum):
     TWELVE = 12
     FOURTEEN = 14
     SIXTEEN = 16
+    EIGHTEEN = 18
 
 @dataclass(frozen=True)
 class PageLayout:
@@ -46,9 +47,10 @@ class PageLayout:
     line_gap: int = 10
 
     # colors (set to light gray to be easy to trace over)
-    text_fill_color: str = "#acadac"
-    guide_border_color: str = "#acadac"
-    guide_center_color: str = "#acadac"
+    title_color: str = "#000000"
+    text_fill_color: str = "#7a7a7a"
+    guide_border_color: str = "#000000"
+    guide_center_color: str = "#000000"
 
     # Guide cell geometry policy
     guide_cell_width_ratio: float = 1.5

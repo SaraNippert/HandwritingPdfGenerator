@@ -46,9 +46,9 @@ class PageLayout:
     line_gap: int = 10
 
     # colors (set to light gray to be easy to trace over)
-    text_fill_color: str = "#c0c1c0"
-    guide_border_color: str = "#c0c1c0"
-    guide_center_color: str = "#c0c1c0"
+    text_fill_color: str = "#acadac"
+    guide_border_color: str = "#acadac"
+    guide_center_color: str = "#acadac"
 
     # Guide cell geometry policy
     guide_cell_width_ratio: float = 1.5

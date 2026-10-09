@@ -30,7 +30,7 @@ handwriting-pdf = "handwriting_pdf_generator.entrypoint:app"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"handwriting_pdf_generator" = ["assets/fonts/*.ttf", "assets/fonts/*.otf", "assets/fonts/*.ttc"]
+"handwriting_pdf_generator" = ["assets/fonts/*.ttf", "assets/fonts/*.otf", "assets/fonts/*.ttc", "data/*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -9,13 +9,16 @@ from ..presets.french import FRENCH_PRESETS
 from ..presets.katakana import KATAKANA_PRESETS
 from ..presets.hiragana import HIRAGANA_PRESETS
 from ..presets.kana import KANA_PRESETS
+from ..presets.kanji import KANJI_PRESETS
 
 ALL_PRESETS: dict[str, WorksheetPreset] = {
     **KATAKANA_PRESETS,
     **HIRAGANA_PRESETS,
     **KANA_PRESETS,
+    **KANJI_PRESETS,
     **FRENCH_PRESETS
 }
+
 
 def select_worksheet_preset() -> ALL_PRESETS:
     """Prompt the user to select a PDF type and return it as an enum value.
@@ -27,16 +30,21 @@ def select_worksheet_preset() -> ALL_PRESETS:
            typer.Abort: If the prompt is cancelled (for example with Ctrl+C or Esc).
        """
 
+    preset_choices = {
+        preset.display_name: preset
+        for preset in ALL_PRESETS.values()
+    }
+
     choice = questionary.select(
         "Select PDF type:",
-        choices=[option for option in ALL_PRESETS],
+        choices=list(preset_choices.keys()),
     ).ask()
 
     if choice is None:
-        raise typer.Abort()  # handles Ctrl+C / escape cleanly
+        raise typer.Abort()  # handles Ctrl+C / escape
 
-    # print(choice)
-    return ALL_PRESETS[choice]
+    return preset_choices[choice]
+
 
 def select_row_render_mode() -> RowRenderMode:
     choice = questionary.select(
@@ -44,9 +52,10 @@ def select_row_render_mode() -> RowRenderMode:
         choices=[option for option in RowRenderMode]
     ).ask()
     if choice is None:
-        choice = RowRenderMode.REPEAT # default to repeat
+        choice = RowRenderMode.REPEAT  # default to repeat
 
     return RowRenderMode(choice)
+
 
 def select_font_size() -> FontSize:
     # do not allow user to input their own font size, only allow tested font sizes
@@ -60,6 +69,7 @@ def select_font_size() -> FontSize:
 
     return FontSize[choice]
 
+
 def select_page_orientation() -> PageOrientation:
     choice = questionary.select(
         "Select page orientation:",
@@ -67,12 +77,14 @@ def select_page_orientation() -> PageOrientation:
     ).ask()
     return PageOrientation(choice)
 
+
 def select_output_mode() -> OutputLayoutMode:
     choice = questionary.select(
         "Select output mode:",
         choices=[option.value for option in OutputLayoutMode]
     ).ask()
     return OutputLayoutMode(choice)
+
 
 def header() -> None:
     """Print a styled banner shown at CLI startup."""

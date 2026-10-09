@@ -5,22 +5,23 @@ import questionary
 
 from ..domain.worksheet_preset import WorksheetPreset, RowRenderMode, OutputLayoutMode
 from ..pdf.layout import PageOrientation, FontSize
+
 from ..presets.french import FRENCH_PRESETS
 from ..presets.katakana import KATAKANA_PRESETS
 from ..presets.hiragana import HIRAGANA_PRESETS
 from ..presets.kana import KANA_PRESETS
 from ..presets.kanji import KANJI_PRESETS
 
-ALL_PRESETS: dict[str, WorksheetPreset] = {
-    **KATAKANA_PRESETS,
-    **HIRAGANA_PRESETS,
-    **KANA_PRESETS,
-    **KANJI_PRESETS,
-    **FRENCH_PRESETS
+PRESET_GROUPS: dict[str, dict[str, WorksheetPreset]] = {
+    "Katakana": KATAKANA_PRESETS,
+    "Hiragana": HIRAGANA_PRESETS,
+    "Kana": KANA_PRESETS,
+    "Kanji": KANJI_PRESETS,
+    "French": FRENCH_PRESETS,
 }
 
 
-def select_worksheet_preset() -> ALL_PRESETS:
+def select_worksheet_preset() -> WorksheetPreset:
     """Prompt the user to select a PDF type and return it as an enum value.
 
        Returns:
@@ -30,20 +31,30 @@ def select_worksheet_preset() -> ALL_PRESETS:
            typer.Abort: If the prompt is cancelled (for example with Ctrl+C or Esc).
        """
 
+    group_choice = questionary.select(
+        "Select character set:",
+        choices=list(PRESET_GROUPS.keys()),
+    ).ask()
+
+    if group_choice is None:
+        raise typer.Abort()
+
+    presets_in_group = PRESET_GROUPS[group_choice]
+
     preset_choices = {
         preset.display_name: preset
-        for preset in ALL_PRESETS.values()
+        for preset in presets_in_group.values()
     }
 
-    choice = questionary.select(
-        "Select PDF type:",
+    preset_choice = questionary.select(
+        f"Select {group_choice.lower()} worksheet:",
         choices=list(preset_choices.keys()),
     ).ask()
 
-    if choice is None:
-        raise typer.Abort()  # handles Ctrl+C / escape
+    if preset_choice is None:
+        raise typer.Abort()
 
-    return preset_choices[choice]
+    return preset_choices[preset_choice]
 
 
 def select_row_render_mode() -> RowRenderMode:

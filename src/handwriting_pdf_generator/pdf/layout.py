@@ -6,11 +6,13 @@ from enum import Enum
 
 # only for landscape orientation half
 # used for booklets
-HALF_LETTER = (LETTER[0], LETTER[1]/2)
+HALF_LETTER = (LETTER[0], LETTER[1] / 2)
+
 
 class PageOrientation(str, Enum):
     PORTRAIT = "portrait"
     LANDSCAPE = "landscape"
+
 
 class FontSize(int, Enum):
     TEN = 10
@@ -18,6 +20,7 @@ class FontSize(int, Enum):
     FOURTEEN = 14
     SIXTEEN = 16
     EIGHTEEN = 18
+
 
 @dataclass(frozen=True)
 class PageLayout:
@@ -48,9 +51,12 @@ class PageLayout:
 
     # colors (set to light gray to be easy to trace over)
     title_color: str = "#000000"
+    definition_color: str = "#000000"
     text_fill_color: str = "#7a7a7a"
     guide_border_color: str = "#000000"
     guide_center_color: str = "#000000"
+
+    definition_gap_ratio: float = 1.0
 
     # Guide cell geometry policy
     guide_cell_width_ratio: float = 1.5
@@ -103,6 +109,10 @@ class PageLayout:
     def first_row_baseline(self) -> float:
         return (self.top - self.title_top_offset) - self.line_height
 
+    @property
+    def definition_gap(self) -> float:
+        return self.text_font_size * self.definition_gap_ratio
+
     # Derived guide geometry
     @property
     def guide_cell_width(self) -> float:
@@ -147,6 +157,7 @@ def build_single_page_layout(page_orientation: PageOrientation, font_size: FontS
     """
     return PageLayout(page_orientation=page_orientation, text_font_size=font_size)
 
+
 def build_booklet_page_one_layout(initial_layout: PageLayout) -> PageLayout:
     """
     Build and return the layout configuration for the first page of a booklet.
@@ -179,5 +190,8 @@ def build_booklet_page_one_layout(initial_layout: PageLayout) -> PageLayout:
         guide_baseline_offset_ratio=initial_layout.guide_baseline_offset_ratio,
         guide_line_width=initial_layout.guide_line_width,
         guide_dash_on=initial_layout.guide_dash_on,
-        guide_dash_off=initial_layout.guide_dash_off
+        guide_dash_off=initial_layout.guide_dash_off,
+        definition_color=initial_layout.definition_color,
+        definition_gap_ratio=initial_layout.definition_gap_ratio,
+        title_color=initial_layout.title_color
     )

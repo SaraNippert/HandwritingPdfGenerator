@@ -7,7 +7,7 @@ from ..domain.worksheet_preset import (
     WorksheetPreset,
     WorksheetSection,
     RowRenderMode,
-    OutputLayoutMode
+    OutputLayoutMode, PromptEntry
 )
 from ..pdf.layout import PageOrientation, FontSize
 
@@ -181,7 +181,7 @@ def build_combined_preset(language_name: str, presets: list[WorksheetPreset]) ->
     if not presets:
         raise ValueError("At least one preset is required to build a combined preset.")
 
-    combined_prompts: list[str] = []
+    combined_prompts: list[PromptEntry | str] = []
     sections: list[WorksheetSection] = []
 
     for preset in presets:
@@ -189,7 +189,7 @@ def build_combined_preset(language_name: str, presets: list[WorksheetPreset]) ->
         sections.append(
             WorksheetSection(
                 title=preset.display_name,
-                prompts=preset.prompts,
+                prompts=tuple(preset.prompts),
             )
         )
 

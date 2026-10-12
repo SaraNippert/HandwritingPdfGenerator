@@ -1,4 +1,6 @@
 # high-level orchestration to create a PDF
+from reportlab.pdfgen.canvas import Canvas
+
 from .booklet import impose_booklet_pages
 from .pagenation import (
     paginate_lines,
@@ -7,7 +9,8 @@ from .pagenation import (
 from ..domain.worksheet_preset import (
     WorksheetPreset,
     RowRenderMode,
-    OutputLayoutMode
+    OutputLayoutMode,
+    LogicalWorksheetPage,
 )
 
 from .document import (
@@ -20,7 +23,8 @@ from .layout import (
     build_single_page_layout,
     PageOrientation,
     FontSize,
-    build_booklet_page_one_layout
+    build_booklet_page_one_layout,
+    PageLayout,
 )
 from .renderer import (
     draw_title,
@@ -54,18 +58,29 @@ class Generator:
         chosen_font = self.preset.available_fonts[0]
         font_name = register_font(chosen_font)
 
-        layout = build_single_page_layout(page_orientation=self.page_orientation, font_size=self.font_size)
+        layout = build_single_page_layout(
+            page_orientation=self.page_orientation,
+            font_size=self.font_size
+        )
         pdf = create_canvas(output_path, title=self.preset.display_name, layout=layout)
 
-        # break up prompts into lines which fit the printable area - not yet implemented
-        lines = plan_rows(
+        # Normalize prompts into PromptEntry rows
+        rows = plan_rows(
             preset=self.preset,
         )
 
-        # divide up content into logical pages
-        logical_worksheet_pages = paginate_lines(preset=self.preset, layout=layout, lines=lines)
+        # Divide content into logical pages.
+        logical_worksheet_pages = paginate_lines(
+            preset=self.preset,
+            layout=layout,
+            lines=rows,
+            font_name=font_name,
+        )
 
-        # organize pages into booklet order
+        # divide up content into logical pages
+        logical_worksheet_pages = impose_booklet_pages(logical_worksheet_pages)
+
+        # Organize pages into booklet order.
         if self.output_mode is OutputLayoutMode.BOOKLET:
             logical_worksheet_pages = impose_booklet_pages(logical_worksheet_pages)
 
@@ -73,84 +88,97 @@ class Generator:
         set_page_characteristics(pdf, font_name, layout)
 
         if self.output_mode is OutputLayoutMode.SINGLE_PAGE:
-            # draw per page
             self.draw_worksheet_single_page(font_name, layout, logical_worksheet_pages, pdf)
         elif self.output_mode is OutputLayoutMode.BOOKLET:
             self.draw_worksheet_booklet(font_name, layout, logical_worksheet_pages, pdf)
+        else:
+            raise NotImplementedError(f"Unsupported output_mode: {self.output_mode}")
 
         pdf.save()
 
-
-    def draw_worksheet_single_page(self, font_name, layout, logical_worksheet_pages, pdf):
+    def draw_worksheet_single_page(
+            self,
+            font_name: str,
+            layout: PageLayout,
+            logical_worksheet_pages: list[LogicalWorksheetPage | None],
+            pdf: Canvas
+    ) -> None:
         for i, page in enumerate(logical_worksheet_pages):
-            if page is not None:
+            if page is None:
+                continue
 
-                if i > 0:
-                    pdf.showPage()
-                    set_page_characteristics(pdf, font_name, layout)
+            if i > 0:
+                pdf.showPage()
+                set_page_characteristics(pdf, font_name, layout)
 
-                if page.title != "":
-                    draw_title(pdf, page.title, layout)
+            if page.title != "":
+                draw_title(pdf, page.title, layout)
 
-                # if single row mode is selected, reorganize the prompts to print as many as possible on a single line
-                if self.row_render_mode is RowRenderMode.SINGLE:
-                    draw_lines_row_render_single(
-                        pdf,
-                        page.lines,
-                        layout,
-                        font_name,
-                        self.preset.guide_style
-                    )
-                elif self.row_render_mode is RowRenderMode.REPEAT:
-                    draw_lines_row_render_repeat(
-                        pdf,
-                        page.lines,
-                        layout,
-                        font_name,
-                        self.preset.guide_style
-                    )
-                else:
-                    raise NotImplementedError(f"Unsupported row_render_mode: {self.row_render_mode}")
+            # If single row mode is selected, print as many prompts as possible per row.
+            if self.row_render_mode is RowRenderMode.SINGLE:
+                draw_lines_row_render_single(
+                    pdf,
+                    list(page.lines),
+                    layout,
+                    font_name,
+                    self.preset.guide_style
+                )
+            elif self.row_render_mode is RowRenderMode.REPEAT:
+                draw_lines_row_render_repeat(
+                    pdf,
+                    list(page.lines),
+                    layout,
+                    font_name,
+                    self.preset.guide_style
+                )
+            else:
+                raise NotImplementedError(f"Unsupported row_render_mode: {self.row_render_mode}")
 
-
-    def draw_worksheet_booklet(self, font_name, layout, logical_worksheet_pages, pdf):
-
+    def draw_worksheet_booklet(
+            self,
+            font_name: str,
+            layout: PageLayout,
+            logical_worksheet_pages: list[LogicalWorksheetPage | None],
+            pdf: Canvas
+    ) -> None:
         booklet_page_layout = build_booklet_page_one_layout(initial_layout=layout)
 
         for i, page in enumerate(logical_worksheet_pages):
-            if page is not None:
-                if i > 0 and (i % 2 == 0):
-                    pdf.showPage()
-                    set_page_characteristics(pdf, font_name, layout)
+            if page is None:
+                continue
 
-                if i % 2 == 0:
-                    pdf.saveState()
-                    full_width, _ = layout.page_size
-                    half_width = full_width / 2
-                    pdf.translate(half_width, 0)
+            if i > 0 and (i % 2 == 0):
+                pdf.showPage()
+                set_page_characteristics(pdf, font_name, layout)
 
-                if page.title != "":
-                    draw_title(pdf, page.title, booklet_page_layout)
+            if i % 2 == 0:
+                pdf.saveState()
+                full_width, _ = layout.page_size
+                half_width = full_width / 2
+                pdf.translate(half_width, 0)
 
-                # if single row mode is selected, reorganize the prompts to print as many as possible on a single line
-                if self.row_render_mode is RowRenderMode.SINGLE:
-                    draw_lines_row_render_single(
-                        pdf,
-                        page.lines,
-                        booklet_page_layout,
-                        font_name,
-                        self.preset.guide_style
-                    )
-                elif self.row_render_mode is RowRenderMode.REPEAT:
-                    draw_lines_row_render_repeat(
-                        pdf,
-                        page.lines,
-                        booklet_page_layout,
-                        font_name,
-                        self.preset.guide_style
-                    )
-                else:
-                    raise NotImplementedError(f"Unsupported row_render_mode: {self.row_render_mode}")
+            if page.title != "":
+                draw_title(pdf, page.title, booklet_page_layout)
 
-                if i % 2 == 0:
-                    pdf.restoreState()
+            # If single row mode is selected, print as many prompts as possible per row.
+            if self.row_render_mode is RowRenderMode.SINGLE:
+                draw_lines_row_render_single(
+                    pdf,
+                    list(page.lines),
+                    booklet_page_layout,
+                    font_name,
+                    self.preset.guide_style
+                )
+            elif self.row_render_mode is RowRenderMode.REPEAT:
+                draw_lines_row_render_repeat(
+                    pdf,
+                    list(page.lines),
+                    booklet_page_layout,
+                    font_name,
+                    self.preset.guide_style
+                )
+            else:
+                raise NotImplementedError(f"Unsupported row_render_mode: {self.row_render_mode}")
+
+            if i % 2 == 0:
+                pdf.restoreState()

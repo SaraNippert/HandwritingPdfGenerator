@@ -4,7 +4,7 @@ from importlib.resources import files
 from pathlib import Path
 
 from ..domain.font_catalog import JAPANESE_FONT_LIST
-from ..domain.worksheet_preset import GuideStyle, WorksheetPreset
+from ..domain.worksheet_preset import GuideStyle, WorksheetPreset, PromptEntry
 
 
 def _label_from_stem(stem: str) -> str:
@@ -24,9 +24,21 @@ def _load_kanji_csv(csv_path: Path) -> tuple[str, ...]:
 
     Blank lines are ignored.
     """
-    lines = csv_path.read_text(encoding="utf-8").splitlines()
-    prompts = tuple(line.strip() for line in lines if line.strip())
-    return prompts
+    entries: list[PromptEntry] = []
+
+    for raw_line in csv_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        parts = [part.strip() for part in line.split(",", 1)]
+        text = parts[0]
+        definition = parts[1] if len(parts) > 1 else ""
+
+        if text:
+            entries.append(PromptEntry(text=text, definition=definition))
+
+    return tuple(entries)
 
 
 def load_kanji_presets() -> dict[str, WorksheetPreset]:

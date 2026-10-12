@@ -64,42 +64,42 @@ def draw_lines_row_render_repeat(
     line_height = layout.line_height
     y = layout.first_row_baseline
 
-    for line in lines:
+    for row in lines:
+        text, definition = _extract_text_and_definition(row)
+        text = text.strip()
+        definition = definition.strip()
         # render empty row if line empty
-        if not line:
-            y -= line_height
-            continue
-
-        # keep track of token width to ensure there is something to draw
-        # and we do not draw past the page margin
-        token_width = stringWidth(line, font_name, layout.text_font_size)
-
-        # skip to next row if token has no width
-        if token_width <= 0:
+        if not text:
             y -= line_height
             continue
 
         # reset horizontal drawing position for each row
         x = layout.left
 
-        if guide_style is GuideStyle.PLUS_DOTTED:
+        if definition:
+            y = _draw_definition_block(pdf, definition, y, font_name, layout)
 
+        token_width = stringWidth(text, font_name, layout.text_font_size)
+
+        if token_width <= 0:
+            y -= line_height
+            continue
+
+        if guide_style is GuideStyle.PLUS_DOTTED:
             while x + layout.guide_cell_width <= layout.right:
                 _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
                 text_x = x + (layout.guide_cell_width - token_width) / 2
-                pdf.drawString(text_x, y, line)
+                pdf.drawString(text_x, y, text)
                 x += layout.guide_cell_step
 
         elif guide_style is GuideStyle.NONE:
-
             while x + token_width <= layout.right:
-                pdf.drawString(x, y, line)
+                pdf.drawString(x, y, text)
                 x += token_width
 
         else:
             raise ValueError(f"Unsupported guide style: {guide_style}")
 
-        # advance cursor to next row
         y -= line_height
 
 
@@ -133,14 +133,22 @@ def draw_lines_row_render_single(
     y = layout.first_row_baseline
     x = layout.left
 
-    for prompt in prompts:
+    for row in prompts:
+        text, definition = _extract_text_and_definition(row)
+        text = text.strip()
+        definition = definition.strip()
+
         # skip if not present
-        if not prompt:
+        if not text:
             continue
+
+        if definition:
+            x = layout.left
+            y = _draw_definition_block(pdf, definition, y, font_name, layout)
 
         # keep track of token width to ensure there is something to draw
         # and we do not draw past the page margin
-        token_width = stringWidth(prompt, font_name, layout.text_font_size)
+        token_width = stringWidth(text, font_name, layout.text_font_size)
 
         # skip to next prompt if token has no width
         if token_width <= 0:
@@ -159,7 +167,7 @@ def draw_lines_row_render_single(
             _draw_dotted_plus_cell(pdf, x, y, layout.guide_cell_width, layout.guide_cell_height, layout)
             # determine the x-coordinate for the text inside the cell to ensure it stays centered
             text_x = x + (layout.guide_cell_width - token_width) / 2
-            pdf.drawString(text_x, y, prompt)
+            pdf.drawString(text_x, y, text)
             x += advance_width
 
         elif guide_style is GuideStyle.NONE:
@@ -170,7 +178,7 @@ def draw_lines_row_render_single(
                 x = layout.left
                 y -= line_height
 
-            pdf.drawString(x, y, prompt)
+            pdf.drawString(x, y, text)
             x += token_width
 
         else:
@@ -241,3 +249,69 @@ def _draw_dotted_plus_cell(
     pdf.setDash()
     pdf.setStrokeColor(previous_stroke_color)
     pdf.setLineWidth(previous_line_width)
+
+
+def _extract_text_and_definition(row) -> tuple[str, str]:
+    # Backward-compatible adapter
+    if hasattr(row, "text"):
+        text = row.text or ""
+        definition = getattr(row, "definition", "") or ""
+        return text, definition
+    return str(row or ""), ""
+
+
+def _definition_font_size(layout: PageLayout) -> int:
+    return min(layout.text_font_size, 12)
+
+
+def _wrap_text_to_width(text: str, font_name: str, font_size: int, max_width: float) -> list[str]:
+    words = text.split()
+    if not words:
+        return []
+
+    lines = []
+    current = words[0]
+
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        if stringWidth(candidate, font_name, font_size) <= max_width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+
+    lines.append(current)
+    return lines
+
+
+def _definition_lines(definition: str, font_name: str, layout: PageLayout) -> list[str]:
+    return _wrap_text_to_width(
+        definition,
+        font_name,
+        _definition_font_size(layout),
+        layout.right - layout.left,
+    )
+
+
+def _draw_definition_block(
+        pdf: Canvas,
+        definition: str,
+        y: float,
+        font_name: str,
+        layout: PageLayout,
+) -> float:
+    lines = _definition_lines(definition, font_name, layout)
+    if not lines:
+        return y
+
+    previous_fill = pdf._fillColorObj
+    pdf.setFillColor(colors.HexColor(layout.definition_color))
+    pdf.setFont(font_name, _definition_font_size(layout))
+
+    for line in lines:
+        pdf.drawString(layout.left, y, line)
+        y -= layout.line_height
+
+    pdf.setFont(font_name, layout.text_font_size)
+    pdf.setFillColor(previous_fill)
+    return y

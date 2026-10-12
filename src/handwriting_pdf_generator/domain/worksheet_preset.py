@@ -18,6 +18,15 @@ class GuideStyle(StrEnum):
 
 
 @dataclass(frozen=True)
+class PromptEntry:
+    text: str
+    definition: str = ""
+
+
+PromptValue = str | PromptEntry
+
+
+@dataclass(frozen=True)
 class LogicalWorksheetPage:
     """
     reusable single page configuration.
@@ -29,13 +38,13 @@ class LogicalWorksheetPage:
         lines: the lines to be printed on the page
     """
     title: str
-    lines: tuple[str, ...]
+    lines: tuple[PromptEntry, ...]
 
 
 @dataclass(frozen=True)
 class WorksheetSection:
     title: str
-    prompts: tuple[str, ...]
+    prompts: tuple[PromptValue, ...]
 
 
 @dataclass(frozen=True)

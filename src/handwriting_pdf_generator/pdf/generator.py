@@ -77,9 +77,6 @@ class Generator:
             font_name=font_name,
         )
 
-        # divide up content into logical pages
-        logical_worksheet_pages = impose_booklet_pages(logical_worksheet_pages)
-
         # Organize pages into booklet order.
         if self.output_mode is OutputLayoutMode.BOOKLET:
             logical_worksheet_pages = impose_booklet_pages(logical_worksheet_pages)
@@ -145,13 +142,14 @@ class Generator:
 
         for i, page in enumerate(logical_worksheet_pages):
             if page is None:
+                pdf.showPage()
                 continue
 
             if i > 0 and (i % 2 == 0):
                 pdf.showPage()
                 set_page_characteristics(pdf, font_name, layout)
 
-            if i % 2 == 0:
+            if i % 2 == 1:
                 pdf.saveState()
                 full_width, _ = layout.page_size
                 half_width = full_width / 2
@@ -180,5 +178,5 @@ class Generator:
             else:
                 raise NotImplementedError(f"Unsupported row_render_mode: {self.row_render_mode}")
 
-            if i % 2 == 0:
+            if i % 2 == 1:
                 pdf.restoreState()
